@@ -43,10 +43,17 @@ jobs:
           rosdep update
           rosdep install --from-paths src --ignore-src -r -y
 
+      - name: Build kinematics_interface first
+        run: |
+          source /opt/ros/jazzy/setup.bash
+          colcon build --packages-select kinematics_interface \
+            --event-handlers console_direct+ \
+            --cmake-args -DCMAKE_BUILD_TYPE=Release
+
       - name: Build workspace
         run: |
           source /opt/ros/jazzy/setup.bash
-          colcon build \
+          colcon build --packages-select kinematics_interface_delta \
             --event-handlers console_direct+ \
             --cmake-args -DCMAKE_BUILD_TYPE=Release
 
