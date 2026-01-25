@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>kinematics_interface_delta</name>
+  <version>0.1.0</version>
+  <description>Delta robot kinematics (standalone C++ solver) for ROS2 Jazzy integration</description>
+  <maintainer email="you@example.com">your name</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>eigen</depend>
+  <build_depend>rclcpp</build_depend>
+  <build_depend>pluginlib</build_depend>
+  <build_depend>kinematics_interface</build_depend>
+  <build_depend>ament_cmake</build_depend>
+
+  <exec_depend>rclcpp</exec_depend>
+  <exec_depend>pluginlib</exec_depend>
+  <exec_depend>kinematics_interface</exec_depend>
+
+  <test_depend>ament_cmake_gtest</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+    <kinematics_interface plugin="${prefix}/kinematics_interface_delta_plugins.xml" />
+  </export>
+  
+</package>

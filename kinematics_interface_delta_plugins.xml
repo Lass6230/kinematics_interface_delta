@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<library path="delta_kinematics_plugin">
+  <class name="kinematics_interface_delta/DeltaKinematicsPlugin"
+         type="kinematics_interface_delta::DeltaKinematicsPlugin"
+         base_class_type="kinematics_interface::KinematicsInterface">
+    <description>Delta robot kinematics plugin (kinematics_interface)</description>
+  </class>
+</library>
