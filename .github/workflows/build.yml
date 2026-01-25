@@ -46,7 +46,7 @@ jobs:
       - name: Build workspace
         run: |
           source /opt/ros/jazzy/setup.bash
-          colcon build --packages-select kinematics_interface_delta \
+          colcon build \
             --event-handlers console_direct+ \
             --cmake-args -DCMAKE_BUILD_TYPE=Release
 
