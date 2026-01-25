@@ -1,0 +1,68 @@
+name: Build and Test ROS 2 Jazzy
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: src/kinematics_interface_delta
+
+      - name: Setup ROS 2 Jazzy
+        uses: ros-tooling/setup-ros@v0.7
+        with:
+          required-ros-distributions: jazzy
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            ros-jazzy-ament-cmake \
+            ros-jazzy-ament-cmake-gtest \
+            ros-jazzy-rclcpp \
+            ros-jazzy-pluginlib \
+            libeigen3-dev
+
+      - name: Clone kinematics_interface repository
+        run: |
+          git clone https://github.com/ros-controls/kinematics_interface.git src/kinematics_interface
+
+      - name: Install rosdep dependencies
+        run: |
+          source /opt/ros/jazzy/setup.bash
+          sudo rosdep init || true
+          rosdep update
+          rosdep install --from-paths src --ignore-src -r -y
+
+      - name: Build workspace
+        run: |
+          source /opt/ros/jazzy/setup.bash
+          colcon build --packages-select kinematics_interface_delta \
+            --event-handlers console_direct+ \
+            --cmake-args -DCMAKE_BUILD_TYPE=Release
+
+      - name: Run tests
+        run: |
+          source /opt/ros/jazzy/setup.bash
+          source install/setup.bash
+          colcon test --packages-select kinematics_interface_delta \
+            --event-handlers console_direct+
+          colcon test-result --verbose
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: |
+            build/kinematics_interface_delta/Testing/
+            log/
