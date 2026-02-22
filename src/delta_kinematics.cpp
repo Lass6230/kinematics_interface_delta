@@ -7,7 +7,6 @@ using namespace kinematics_interface_delta;
 
 static constexpr double PI = M_PI;
 static constexpr double sqrt3 = 1.7320508075688772; // std::sqrt(3.0)
-static constexpr double tan30 = 0.5773502691896257; // std::tan(30deg)
 static constexpr double sin30 = 0.5;
 
 DeltaKinematics::DeltaKinematics(const DeltaGeometry &g, bool debug) : g_(g), debug_(debug) {}
@@ -16,7 +15,7 @@ DeltaKinematics::DeltaKinematics(const DeltaGeometry &g, bool debug) : g_(g), de
 bool DeltaKinematics::delta_calcAngleYZ(double x0, double y0, double z0, double &theta) const
 {
   // based on standard delta robot inverse kinematics derivation
-  double y1 = -((g_.f - g_.e) * tan30) / 2.0; // shift for base/end effector difference
+  double y1 = -(g_.f - g_.e); // shift for base/end effector radius difference
   // apply motor Z offset to z coordinate (shift workspace if motors are offset)
   z0 -= g_.motor_z_offset;
 
@@ -66,11 +65,10 @@ std::optional<std::array<double,3>> DeltaKinematics::delta_calcForward(double th
     std::cerr << "FK: input thetas=[" << theta1 << ", " << theta2 << ", " << theta3 << "]\n";
   }
   
-  const double tan30 = 1.0 / std::sqrt(3.0);
   const double sin30 = 0.5;
   const double tan60 = std::sqrt(3.0);
   
-  double t = (g_.f - g_.e) * tan30 / 2.0;
+  double t = g_.f - g_.e;  // base radius - EE radius
   
   // Convert angles to elbow joint positions
   double y1 = -(t + g_.rf * std::cos(theta1));
@@ -129,7 +127,7 @@ std::array<std::array<double,3>, 3> DeltaKinematics::calculate_elbow_positions(c
 {
   // Calculate elbow positions for each arm based on joint angles
   // These are the positions where upper arm meets lower arm (forearm)
-  double t = (g_.f - g_.e) * tan30 / 2.0;
+  double t = g_.f - g_.e;  // base radius - EE radius
   
   std::array<std::array<double,3>, 3> elbows;
   
@@ -138,14 +136,14 @@ std::array<std::array<double,3>, 3> DeltaKinematics::calculate_elbow_positions(c
   elbows[0][1] = -(t + g_.rf * std::cos(thetas[0]));  // y
   elbows[0][2] = -g_.rf * std::sin(thetas[0]) + g_.motor_z_offset;  // z (add motor offset)
   
-  // Elbow 2 (arm at 120 degrees around base)
-  elbows[1][0] = (t + g_.rf * std::cos(thetas[1])) * sin30;  // x
-  elbows[1][1] = (t + g_.rf * std::cos(thetas[1])) * std::cos(PI/6.0);  // y
+  // Elbow 2 (arm at 120 degrees around base, radial direction at 30° from +X)
+  elbows[1][0] = (t + g_.rf * std::cos(thetas[1])) * std::cos(PI/6.0);  // x = cos30 * (...)
+  elbows[1][1] = (t + g_.rf * std::cos(thetas[1])) * sin30;  // y = sin30 * (...)
   elbows[1][2] = -g_.rf * std::sin(thetas[1]) + g_.motor_z_offset;  // z
   
-  // Elbow 3 (arm at 240 degrees around base)
-  elbows[2][0] = -(t + g_.rf * std::cos(thetas[2])) * sin30;  // x
-  elbows[2][1] = (t + g_.rf * std::cos(thetas[2])) * std::cos(PI/6.0);  // y
+  // Elbow 3 (arm at 240 degrees around base, radial direction at 150° from +X)
+  elbows[2][0] = -(t + g_.rf * std::cos(thetas[2])) * std::cos(PI/6.0);  // x = -cos30 * (...)
+  elbows[2][1] = (t + g_.rf * std::cos(thetas[2])) * sin30;  // y = sin30 * (...)
   elbows[2][2] = -g_.rf * std::sin(thetas[2]) + g_.motor_z_offset;  // z
   
   return elbows;
