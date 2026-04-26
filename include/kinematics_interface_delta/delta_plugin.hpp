@@ -58,6 +58,4 @@ private:
 };
 
 } // namespace
-
-PLUGINLIB_EXPORT_CLASS(kinematics_interface_delta::DeltaKinematicsPlugin, kinematics_interface::KinematicsInterface)
 #endif
